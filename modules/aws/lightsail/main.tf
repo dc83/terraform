@@ -4,7 +4,6 @@
 #              convention.
 module "labels" {
   source  = "dc83/terraform/modules/aws/labels"
-  version = "1.3.0"
 
   name        = var.name
   repository  = var.repository
