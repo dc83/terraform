@@ -2,7 +2,7 @@
 ## Labels module callled that will be used for naming and tags.
 ##-----------------------------------------------------------------------------
 module "labels" {
-  source  = "dc83/terraform/modules/aws/labels"
+  source  = "../labels"
 
   name        = var.name
   environment = var.environment

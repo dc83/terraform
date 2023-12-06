@@ -3,7 +3,7 @@
 #              for resources. You can use terraform-labels to implement a strict naming
 #              convention.
 module "labels" {
-  source  = "dc83/terraform/modules/aws/labels"
+  source  = "../labels"
 
   enabled     = var.enabled
   name        = var.name
