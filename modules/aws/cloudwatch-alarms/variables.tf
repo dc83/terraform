@@ -32,8 +32,8 @@ variable "label_order" {
 
 variable "managedby" {
   type        = string
-  default     = "hello@clouddrove.com"
-  description = "ManagedBy, eg 'CloudDrove'."
+  default     = "Dino"
+  description = "ManagedBy, eg '3D'."
 }
 
 #Module      : CLOUDWATCH METRIC ALARM

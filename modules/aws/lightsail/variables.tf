@@ -130,7 +130,7 @@ variable "key_path" {
 
 variable "domain_name" {
   type        = string
-  default     = "clouddrove.ca"
+  default     = ""
   description = "This is the name of the resource."
 }
 variable "user_data" {
