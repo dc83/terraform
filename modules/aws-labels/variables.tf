@@ -1,4 +1,4 @@
-#Module      : LABEL
+#Module      : aws-labels
 #Description : Terraform label module variables.
 variable "name" {
   type        = string
@@ -14,7 +14,7 @@ variable "environment" {
 
 variable "repository" {
   type        = string
-  default     = "https://github.com/clouddrove/terraform-aws-labels"
+  default     = "https://github.com/dc83/terraform/modules/aws-labels"
   description = "Terraform current module repo"
 }
 
@@ -38,8 +38,8 @@ variable "extra_tags" {
 
 variable "managedby" {
   type        = string
-  default     = "hello@clouddrove.com"
-  description = "ManagedBy, eg 'CloudDrove'."
+  default     = "Dino"
+  description = "ManagedBy, eg '3D'."
 }
 
 variable "enabled" {
