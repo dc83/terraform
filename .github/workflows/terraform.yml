@@ -1,0 +1,77 @@
+name: Github Actions Workflow with Terragrunt!!
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to...'
+        required: true
+        type: environment
+
+jobs:
+  terragrunt_init_plan:
+    runs-on: ubuntu-latest
+    environment:
+        name: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Checkout 
+        uses: actions/checkout@v3
+
+      - name: Install & Setup Terragrunt
+        run: |
+          wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.32.0/terragrunt_linux_amd64
+          chmod +x terragrunt_linux_amd64
+          mv terragrunt_linux_amd64 /usr/local/bin/terragrunt
+          terragrunt --version
+
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Run Terragrunt for ec2
+        working-directory: root/${{ github.event.inputs.environment }}/ec2
+        run: |
+          terragrunt init
+          terragrunt plan
+
+      - name: Run Terragrunt for s3
+        working-directory: root/${{ github.event.inputs.environment }}/s3
+        run: |
+          terragrunt init
+          terragrunt plan
+
+  apply:
+    needs: terragrunt_init_plan
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Checkout 
+        uses: actions/checkout@v3
+
+      - name: Install & Setup Terragrunt
+        run: |
+          wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.32.0/terragrunt_linux_amd64
+          chmod +x terragrunt_linux_amd64
+          mv terragrunt_linux_amd64 /usr/local/bin/terragrunt
+          terragrunt --version
+            
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Run Terragrunt Apply for ec2
+        working-directory: root/${{ github.event.inputs.environment }}/ec2
+        run: terragrunt apply -auto-approve
+
+      - name: Run Terragrunt Apply for s3
+        working-directory: root/${{ github.event.inputs.environment }}/s3
+        run: terragrunt apply -auto-approve
