@@ -5,7 +5,7 @@ output "arn" {
 
 output "arn_ev" {
   description = "The ARN assigned by AWS to this policy"
-  value = "${module.eventbridge.eventbridge_bus_arn}"
+  value       = module.eventbridge.eventbridge_bus_arn
 }
 
 output "fn_name_snapshot" {

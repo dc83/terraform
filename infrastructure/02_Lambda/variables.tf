@@ -2,4 +2,4 @@
 variable "environment" {}
 
 # Name (instance)
-variable name {}
+variable "name" {}

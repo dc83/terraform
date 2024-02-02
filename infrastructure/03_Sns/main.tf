@@ -10,5 +10,4 @@ module "sns" {
       endpoint = var.sms
     }
   }
-  //tags = local.tags
 }
