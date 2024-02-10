@@ -5,11 +5,17 @@ on:
 env:
   tf_version: '1.5.7'
   tg_version: '0.53.2'
-  working_dir: 'project'
 
 jobs:
   checks:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        path:
+          - dev
+          - prod
+
     steps:
       - name: 'Checkout'
         uses: actions/checkout@main
@@ -19,5 +25,5 @@ jobs:
         with:
           tf_version: ${{ env.tf_version }}
           tg_version: ${{ env.tg_version }}
-          tg_dir: ${{ env.working_dir }}
+          tg_dir: environment/${{ matrix.path }}
           tg_command: 'hclfmt --terragrunt-check --terragrunt-diff'
