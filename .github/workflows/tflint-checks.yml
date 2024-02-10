@@ -1,0 +1,23 @@
+name: 'Terragrunt GitHub Actions'
+on:
+  - pull_request
+
+env:
+  tf_version: '1.5.7'
+  tg_version: '0.53.2'
+  working_dir: 'project'
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@main
+
+      - name: Check terragrunt HCL
+        uses: gruntwork-io/terragrunt-action@v2
+        with:
+          tf_version: ${{ env.tf_version }}
+          tg_version: ${{ env.tg_version }}
+          tg_dir: ${{ env.working_dir }}
+          tg_command: 'hclfmt --terragrunt-check --terragrunt-diff'

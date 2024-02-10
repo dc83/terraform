@@ -1,0 +1,91 @@
+name: Scheduled drift detection
+on:
+  schedule:
+    # Run Monday to Friday at 09:00
+    - cron: "0 8 * * *"
+  # Allow manual triggering
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  get-all-tf-dirs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+  drift-detection:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        path:
+          - dev
+          - prod
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: us-east-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}          
+
+      - name: Terraform plan
+        id: terraform-plan
+        uses: dflook/terraform-plan@v1.37.0
+        with:
+          path: terraform/${{ matrix.dir }}
+          label: terraform/${{ matrix.dir }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Write Terraform plan to variable
+        id: write-plan
+        run: |
+          terraform_plan=$(awk '{printf "%s\\n", $0}' plan.txt | sed 's/"/\\"/g')
+
+          plan_length=$(echo $terraform_plan | wc -c)
+          
+          if [[ $plan_length -gt 4000 ]]; then
+            echo "Terraform plan is too long for Slack blocks, truncating to 4000 characters"
+            terraform_plan=$(echo $terraform_plan | head -c 4000)"...\n\nPlan was truncated, see here for the full plan: $WORKFLOW_LOGS"
+          fi
+          
+          echo "TERRAFORM_PLAN=$terraform_plan" >> "$GITHUB_OUTPUT"
+        shell: bash
+        env:
+          WORKFLOW_LOGS: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      - name: Google Chat Notification if changes detected
+        if: ${{ steps.terraform-plan.outputs.changes == 'true' }}
+        id: gchat
+        uses: Co-qn/google-chat-notification@releases/v1
+
+        with:
+          payload: |
+            {
+              "text": "Drift Detection GitHub action has detected drift\n Repo: ${{ github.event.repository.name }}\n Directory: terraform/${{ matrix.dir }}\n",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Drift Detection GitHub action has detected drift\n Repo: ${{ github.event.repository.name }}\n Directory: terraform/${{ matrix.dir }}\n "
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Differences: \n```${{ steps.write-plan.outputs.TERRAFORM_PLAN }}```"
+                  }
+                }
+              ]
+            }
+          url: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}

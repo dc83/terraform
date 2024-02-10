@@ -7,7 +7,7 @@ locals {
 generate "backend" {
   path      = "backend.tf"
   if_exists = "overwrite_terragrunt"
-  contents = <<EOF
+  contents  = <<EOF
 terraform {
   backend "s3" {
     bucket = "example-buckekjkj66767687hjkkt-${local.env}"
@@ -15,6 +15,7 @@ terraform {
     region         = "us-east-1"
     encrypt        = true
     dynamodb_table = "my-lock-table"
+    skip_credentials_validation = true
   }
 }
 EOF
