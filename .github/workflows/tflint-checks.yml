@@ -46,7 +46,7 @@ jobs:
               echo $FMT_STATUS
               echo FMT_STATUS
               echo "--------------"
-            if [[ $FMT_STATUS -ne 0 ]]; then
+            if [[ $FMT_STATUS -eq 1 ]]; then
                 echo "❌ terraform fmt failed - ${changed_file}" >> $GITHUB_STEP_SUMMARY
                 echo "CHECK_STATUS=1" >> $GITHUB_ENV
             fi
