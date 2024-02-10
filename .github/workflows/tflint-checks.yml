@@ -42,8 +42,11 @@ jobs:
             if [[ $changed_file == *.hcl ]]; then
               terragrunt hclfmt --terragrunt-hclfmt-file $changed_file
               FMT_STATUS=$(echo $?)
-
-              if [[ $FMT_STATUS -ne 0 ]]; then
+              echo "--------------"
+              echo $FMT_STATUS
+              echo FMT_STATUS
+              echo "--------------"
+            if [[ $FMT_STATUS -ne 0 ]]; then
                 echo "❌ terraform fmt failed - ${changed_file}" >> $GITHUB_STEP_SUMMARY
                 echo "CHECK_STATUS=1" >> $GITHUB_ENV
               fi
