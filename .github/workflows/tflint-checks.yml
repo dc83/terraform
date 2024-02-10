@@ -40,7 +40,7 @@ jobs:
             echo "Checking terraform fmt on ${changed_file}..."
 
             if [[ $changed_file == *.hcl ]]; then
-              terragrunt hclfmt --terragrunt-hclfmt-file $changed_file
+              terragrunt hclfmt --terragrunt-check --terragrunt-hclfmt-file $changed_file
               FMT_STATUS=$(echo $?)
               echo "--------------"
               echo $FMT_STATUS
