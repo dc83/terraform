@@ -29,17 +29,11 @@ jobs:
           tg_command: 'hclfmt --terragrunt-check --terragrunt-diff'
 
       - name: Add & Commit
-        # You may pin to the exact commit or the version.
-        # uses: EndBug/add-and-commit@b5dec7ea7647ed6edf307ec828d3aeb6bca69f63
         uses: EndBug/add-and-commit@v5.1.0
         with:
-          # Arguments for the git add command
           add: '.'
-          # The name of the user that will be displayed as the author of the commit
           author_name: 'Jake Jones - ' ${{ matrix.path }}
-          # The email of the user that will be displayed as the author of the commit
           author_email: ''
-          # Name of the branch to use, if different from the one that triggered the workflow
           branch: ''
           cwd: ''
           message: 'ran terraform fmt'
