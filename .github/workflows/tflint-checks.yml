@@ -34,8 +34,6 @@ jobs:
           terragrunt -v
       - name: Validate terraform fmt (added_modified)
         run: |
-          set +e
-
           echo "CHECK_STATUS=0" >> $GITHUB_ENV
 
           for changed_file in ${{ steps.pr_files.outputs.added_modified }}; do
