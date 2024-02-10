@@ -51,5 +51,6 @@ jobs:
               fi
             fi
           done
+        shell: bash
       - name: Process check
         run: exit $CHECK_STATUS
