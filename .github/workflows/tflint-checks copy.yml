@@ -51,10 +51,10 @@ jobs:
       if: github.ref != 'refs/heads/main'
       uses: gruntwork-io/terragrunt-action@v2
       with:
-          tf_version: ${{ env.tf_version }}
-          tg_version: ${{ env.tg_version }}
-          tg_dir: ${{ env.working_dir }}
-          tg_command: 'hclfmt --terragrunt-check --terragrunt-diff'
+        tf_version: ${{ env.tf_version }}
+        tg_version: ${{ env.tg_version }}
+        tg_dir: ${{ env.working_dir }}
+        tg_command: 'hclfmt --terragrunt-check --terragrunt-diff'
 #
 #    # Run a terraform validate for push and PR on non-main branch
 #    # Run even if formatting fails
