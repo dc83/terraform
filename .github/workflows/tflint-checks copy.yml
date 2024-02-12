@@ -42,34 +42,30 @@ jobs:
           soft_fail: false
           skip_check: CKV_AZURE_88,CKV_AZURE_71,CKV_AZURE_16,CKV_AZURE_80,CKV_AZURE_63,CKV_AZURE_18,CKV_AZURE_65,CKV_AZURE_17,CKV_AZURE_13,CKV_AZURE_78,CKV_AZURE_66,CKV_AZURE_44,CKV_AZURE_35,CKV_AZURE_43,CKV_AZURE_33,CKV_AZURE_3,CKV2_AZURE_1,CKV2_AZURE_18,CKV2_AZURE_8,CKV2_AZURE_21,CKV_GIT_4
 
-
-
-      - name: Reformat Plan
-        if: github.event_name == 'pull_request' && (success() || failure())
-        run: |
-          echo 'JSON.stringify(${{steps.fmt.outputs}}' \
-          | sed -E 's/^([[:space:]]+)([-+])/\2\1/g' > plan.txt
-
-      - name: Put Plan in Env Var
-        if: github.event_name == 'pull_request' && (success() || failure())
-        run: |
-          FMT=$(cat plan.txt)
-          echo "FMT<<EOF" >> $GITHUB_ENV
-          echo "$FMT" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-
-      - name: Post Plan to GitHub PR
-        if: github.event_name == 'pull_request' && (success() || failure())
-        uses: mshick/add-pr-comment@v1
+      - name: comment
+        uses: actions/github-script@v3
+        if: github.event_name == 'pull_request' && ${{ matrix.target }}
         with:
-          allow-repeats: true
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          repo-token-user-login: 'github-actions[bot]'
-          message: |
-            ## ${{ matrix.path }} fmt
-            ```diff
-            ${{ env.FMT }}
-            ```
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Terraform a 📖\`${{ steps.fmt.outcome }}\`
+
+            <details><summary>Show Plan</summary>
+
+            \`\`\`\n
+            ${{ env.PLAN-OUTPUT }}
+            \`\`\`
+
+            </details>
+
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
 
 
 # Add - a comment to pull requests with plan results
