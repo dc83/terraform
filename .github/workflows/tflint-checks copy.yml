@@ -12,8 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
-      - name: 'Checkout'
-        uses: actions/checkout@main
+      - name: Checkout PR branch
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ steps.comment-branch.outputs.head_ref }}
 
       # Run a terragrunt HCL fmt for push and PR on non-main branch
       - name: Check terragrunt HCL
