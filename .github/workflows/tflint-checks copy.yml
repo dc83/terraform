@@ -44,6 +44,30 @@ jobs:
 
 
 
+      - name: Reformat Plan
+        run: |
+          echo '${{ steps.fmt.outputs.stdout || steps.fmt.outputs.stderr }}' \
+          | sed -E 's/^([[:space:]]+)([-+])/\2\1/g' > plan.txt
+
+      - name: Put Plan in Env Var
+        run: |
+          FMT=$(cat plan.txt)
+          echo "FMT<<EOF" >> $GITHUB_ENV
+          echo "$FMT" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Post Plan to GitHub PR
+        uses: mshick/add-pr-comment@v1
+        with:
+          allow-repeats: true
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token-user-login: 'github-actions[bot]'
+          message: |
+            ## ${{ matrix.path }} fmt
+            ```diff
+            ${{ env.FMT }}
+            ```
+
 
 # Add - a comment to pull requests with plan results
       - name: add-plan-comment
