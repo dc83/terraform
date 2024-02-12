@@ -4,6 +4,8 @@ on: [push, pull_request]
 
 env:
   TF_LOG: INFO
+  tf_version: '1.5.7'
+  tg_version: '0.53.2'
 
 jobs:
   terraform:
