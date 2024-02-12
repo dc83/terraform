@@ -45,11 +45,13 @@ jobs:
 
 
       - name: Reformat Plan
+        if: github.event_name == 'pull_request' && (success() || failure())
         run: |
           echo '${{ steps.fmt.outputs.stdout || steps.fmt.outputs.stderr }}' \
           | sed -E 's/^([[:space:]]+)([-+])/\2\1/g' > plan.txt
 
       - name: Put Plan in Env Var
+        if: github.event_name == 'pull_request' && (success() || failure())
         run: |
           FMT=$(cat plan.txt)
           echo "FMT<<EOF" >> $GITHUB_ENV
@@ -57,6 +59,7 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
 
       - name: Post Plan to GitHub PR
+        if: github.event_name == 'pull_request' && (success() || failure())
         uses: mshick/add-pr-comment@v1
         with:
           allow-repeats: true
