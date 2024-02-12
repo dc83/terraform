@@ -3,34 +3,41 @@ name: 'Terraform'
 on: [push, pull_request]
 
 env:
-  TF_LOG: INFO
   tf_version: '1.5.7'
   tg_version: '0.53.2'
+  working_dir: './'
 
 jobs:
-  terraform:
-    name: 'Terraform'
+  checks:
     runs-on: ubuntu-latest
-
-    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
-    # Set the working directory to main for the config files
-    defaults:
-      run:
-        shell: bash
-        working-directory: ./
-
     steps:
-    # Checkout the repository to the GitHub Actions runner
-    - name: Checkout
-      uses: actions/checkout@v2
+      - name: 'Checkout'
+        uses: actions/checkout@main
 
-    # Install the preferred version of Terraform CLI 
-    - name: Setup Terragrunt
-      uses: gruntwork-io/terragrunt-action@v2
-      with:
+      # Run a terragrunt HCL fmt for push and PR on non-main branch
+      - name: Check terragrunt HCL
+        id: fmt
+        if: github.ref != 'refs/heads/main'
+        uses: gruntwork-io/terragrunt-action@v2
+        with:
           tf_version: ${{ env.tf_version }}
           tg_version: ${{ env.tg_version }}
           tg_dir: ${{ env.working_dir }}
+          tg_command: 'hclfmt --terragrunt-check --terragrunt-diff'
+
+    # Run Checkov against configuration
+      - name: Checkov
+        if: github.event_name == 'pull_request'
+        id: checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          quiet: true
+          framework: terraform
+          container_user: 1000
+          output_format: github_failed_only
+          soft_fail: false
+          skip_check: CKV_AZURE_88,CKV_AZURE_71,CKV_AZURE_16,CKV_AZURE_80,CKV_AZURE_63,CKV_AZURE_18,CKV_AZURE_65,CKV_AZURE_17,CKV_AZURE_13,CKV_AZURE_78,CKV_AZURE_66,CKV_AZURE_44,CKV_AZURE_35,CKV_AZURE_43,CKV_AZURE_33,CKV_AZURE_3,CKV2_AZURE_1,CKV2_AZURE_18,CKV2_AZURE_8,CKV2_AZURE_21,CKV_GIT_4
+
 
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
 #    - name: Terraform Init
@@ -45,16 +52,7 @@ jobs:
 #        CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
 #      run: terraform init -backend-config="storage_account_name=$STORAGE_ACCOUNT" -backend-config="container_name=$CONTAINER_NAME" -backend-config="resource_group_name=$RESOURCE_GROUP"
 
-    # Run a terraform fmt for push and PR on non-main branch
-    - name: Terraform Format
-      id: fmt
-      if: github.ref != 'refs/heads/main'
-      uses: gruntwork-io/terragrunt-action@v2
-      with:
-        tf_version: ${{ env.tf_version }}
-        tg_version: ${{ env.tg_version }}
-        tg_dir: ${{ env.working_dir }}
-        tg_command: 'hclfmt --terragrunt-check --terragrunt-diff'
+
 #
 #    # Run a terraform validate for push and PR on non-main branch
 #    # Run even if formatting fails
@@ -74,18 +72,6 @@ jobs:
 #      if: github.event_name == 'pull_request'
 #      run: terraform plan -no-color
 
-    # Run Checkov against configuration
-    - name: Checkov
-      if: github.event_name == 'pull_request'
-      id: checkov
-      uses: bridgecrewio/checkov-action@master
-      with:
-        quiet: true
-        framework: terraform
-        container_user: 1000
-        output_format: github_failed_only
-        soft_fail: false
-        skip_check: CKV_AZURE_88,CKV_AZURE_71,CKV_AZURE_16,CKV_AZURE_80,CKV_AZURE_63,CKV_AZURE_18,CKV_AZURE_65,CKV_AZURE_17,CKV_AZURE_13,CKV_AZURE_78,CKV_AZURE_66,CKV_AZURE_44,CKV_AZURE_35,CKV_AZURE_43,CKV_AZURE_33,CKV_AZURE_3,CKV2_AZURE_1,CKV2_AZURE_18,CKV2_AZURE_8,CKV2_AZURE_21,CKV_GIT_4
     
 #    # Add a comment to pull requests with plan results
 #    - name: add-plan-comment
