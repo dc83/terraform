@@ -1,6 +1,6 @@
 name: 'Terraform'
 
-on: [push, pull_request]
+on: [pull_request]
 
 env:
   tf_version: '1.5.7'
