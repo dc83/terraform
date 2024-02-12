@@ -20,24 +20,17 @@ jobs:
       # Run a terragrunt HCL fmt for push and PR on non-main branch
       - name: Check terragrunt HCL
         id: fmt
-        if: github.ref != 'refs/heads/main'
+        if: github.event_name == 'pull_request' && (success() || failure())
         uses: gruntwork-io/terragrunt-action@v2
         with:
           tf_version: ${{ env.tf_version }}
           tg_version: ${{ env.tg_version }}
           tg_dir: ${{ env.working_dir }}
           tg_command: 'hclfmt --terragrunt-check --terragrunt-diff'
-          tg_comment: 1
-          run: |
-            echo "------"
-            echo $(jq -r '.pull_request.comments_url' "$GITHUB_EVENT_PATH")
-            echo "------"
-            echo "aaaaaaaaa"
-            echo $GITHUB_EVENT_PATH
-            echo "aaaaaaaaaaa"
+
         # Run Checkov against configuration
       - name: Checkov
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && (success() || failure())
         id: checkov
         uses: bridgecrewio/checkov-action@master
         with:
