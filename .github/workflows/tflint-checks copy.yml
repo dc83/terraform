@@ -25,7 +25,14 @@ jobs:
           tg_dir: ${{ env.working_dir }}
           tg_command: 'hclfmt --terragrunt-check --terragrunt-diff'
           tg_comment: 1
-    # Run Checkov against configuration
+          run: |
+            echo "------"
+            echo $(jq -r '.pull_request.comments_url' "$GITHUB_EVENT_PATH")
+            echo "------"
+            echo "aaaaaaaaa"
+            echo $GITHUB_EVENT_PATH
+            echo "aaaaaaaaaa"
+        # Run Checkov against configuration
       - name: Checkov
         if: github.event_name == 'pull_request'
         id: checkov
