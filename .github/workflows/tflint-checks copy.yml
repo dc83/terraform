@@ -24,7 +24,7 @@ jobs:
           tg_version: ${{ env.tg_version }}
           tg_dir: ${{ env.working_dir }}
           tg_command: 'hclfmt --terragrunt-check --terragrunt-diff'
-
+          tg_comment: 1
     # Run Checkov against configuration
       - name: Checkov
         if: github.event_name == 'pull_request'
