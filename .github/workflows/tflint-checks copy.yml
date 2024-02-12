@@ -47,7 +47,7 @@ jobs:
       - name: Reformat Plan
         if: github.event_name == 'pull_request' && (success() || failure())
         run: |
-          echo '${{ steps.fmt.outputs.stdout || steps.fmt.outputs.stderr }}' \
+          echo '${{join(steps.fmt.outputs.*)}}' \
           | sed -E 's/^([[:space:]]+)([-+])/\2\1/g' > plan.txt
 
       - name: Put Plan in Env Var
@@ -80,7 +80,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = `\`\`\`terraform\`${{join(steps.fmt.outputs.*, '\n')}}\`\`\`\`
+            const output = `\`\`\`terraform\`${{join(steps.fmt.outputs.*)}}\`\`\`\`
             #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
             #### Terraform Validation 🤖${{ steps.validate.outputs.stdout }}
             #### Checkov 🧪\`${{ steps.checkov.outcome }}\`
