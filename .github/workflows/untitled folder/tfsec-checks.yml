@@ -1,6 +1,5 @@
 name: Tfsec Checks on Terraform Code
     
-
 # Only trigger, when the build workflow succeeded
 on:
   workflow_run:
