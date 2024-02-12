@@ -31,7 +31,7 @@ jobs:
             echo "------"
             echo "aaaaaaaaa"
             echo $GITHUB_EVENT_PATH
-            echo "aaaaaaaaaa"
+            echo "aaaaaaaaaaa"
         # Run Checkov against configuration
       - name: Checkov
         if: github.event_name == 'pull_request'
