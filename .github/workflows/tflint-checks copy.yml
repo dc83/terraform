@@ -47,7 +47,7 @@ jobs:
       - name: Reformat Plan
         if: github.event_name == 'pull_request' && (success() || failure())
         run: |
-          echo '${{join(steps.fmt.outputs.*, '\n')}}' \
+          echo '${{steps.fmt.outputs}}' \
           | sed -E 's/^([[:space:]]+)([-+])/\2\1/g' > plan.txt
 
       - name: Put Plan in Env Var
