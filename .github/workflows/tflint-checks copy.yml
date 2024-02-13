@@ -1,5 +1,4 @@
 name: terraform-infra-provisioning
-
 on:
   workflow_dispatch:
   push:
