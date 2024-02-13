@@ -9,6 +9,10 @@ on:
     branches: ["main"]
     paths-ignore:
       - '**/README.md'
+env:
+  tf_version: '1.5.7'
+  tg_version: '0.53.2'
+  working_dir: './'
 
 permissions: read-all
 #--------------------------
@@ -35,9 +39,16 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
-    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
+    # Terragrunt Check
+    - name: Check terragrunt HCL
+      if: github.event_name == 'pull_request'
+      uses: gruntwork-io/terragrunt-action@v2
+      with:
+        tf_version: ${{ env.tf_version }}
+        tg_version: ${{ env.tg_version }}
+        tg_dir: ${{ env.working_dir }}
+        tg_command: 'hclfmt --terragrunt-check --terragrunt-diff'
+      continue-on-error: true
 
     - name: Setup Infracost
       uses: infracost/actions/setup@v2
