@@ -38,7 +38,8 @@ jobs:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
       uses: actions/checkout@v3
-
+      continue-on-error: true
+      
     # Terragrunt Check
     - name: Check terragrunt HCL
       if: github.event_name == 'pull_request'
