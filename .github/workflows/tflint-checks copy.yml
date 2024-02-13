@@ -133,18 +133,27 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
-          const output = `#### Terraform Format and Style 🖌\`${ step.fmt.outcome }\`
+          const output = `#### Terraform Format and Style 🖌\`${{steps.fmt.outcome}}\`
+
           <details><summary>Show Format</summary>
+          \`\`\`\n
+          ${steps.fmt.outputs.tg_action_output}
+          \`\`\`
+          </details>
+
+          #### Terraform 22121 ⚙️\`${{ steps.fmt.outcome }}\`
+          #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+          #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+          #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+          #### All vars 🤖\`${{ toJSON(steps) }}\`
+
+          <details><summary>Show Plan</summary>
 
           \`\`\`\n
-          ${step.fmt.outputs.tg_action_output}
+          ${process.env.PLAN}
           \`\`\`
 
           </details>
-
-          #### All vars 🤖\`${{ toJSON(steps) }}\`
-
-
 
           *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
 
