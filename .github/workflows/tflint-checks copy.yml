@@ -135,7 +135,7 @@ jobs:
         script: |
           const output = `#### Terraform Format and Style 🖌\`${{steps.fmt.outputs.tg_action_output}}\`
           <details><summary>Show Plan</summary>
-          \`\`\`\n
+          \`\`\`
           ${{steps.fmt.outputs.tg_action_output}}
           \`\`\`
           </details>
