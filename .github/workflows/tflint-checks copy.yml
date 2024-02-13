@@ -43,7 +43,6 @@ jobs:
     # Terragrunt Check
     - name: Terraform Format
       id: fmt
-      if: github.event_name == 'pull_request'
       uses: gruntwork-io/terragrunt-action@v2
       with:
           tf_version: ${{ env.tf_version }}
@@ -129,7 +128,6 @@ jobs:
 
     - name: Post Terraform Plan output
       uses: actions/github-script@v6
-      if: github.event_name == 'pull_request'
       env:
         PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
       with:
