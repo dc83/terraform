@@ -134,6 +134,11 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
           const output = `#### Terraform Format and Style 🖌\`${{steps.fmt.outputs.tg_action_output}}\`
+          <details><summary>Show Plan</summary>
+          \`\`\`\n
+          ${{steps.fmt.outputs.tg_action_output}}
+          \`\`\`
+          </details>
           #### Terraform 22121 ⚙️\`${{ steps.fmt.outcome }}\`
           #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
           #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
