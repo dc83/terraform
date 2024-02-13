@@ -133,7 +133,7 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
-          const output = `#### Terraform Format and Style 🖌\`${join(steps.fmt.outputs.*)}\`
+          const output = `#### Terraform Format and Stylea 🖌\`${join(steps.fmt.outputs.*)}\`
           #### Terraform 22121 ⚙️\`${{ steps.fmt.outcome }}\`
           #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
           #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
