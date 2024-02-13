@@ -12,8 +12,8 @@ on:
 env:
   tf_version: '1.5.7'
   tg_version: '0.53.2'
-  working_dir: './'
-
+  tg_dir: './'
+  
 permissions: read-all
 #--------------------------
 #
@@ -39,17 +39,24 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
       continue-on-error: true
-      
+
+    # Install the preferred version of Terraform CLI
+    - name: Setup Terragrunt
+      uses: gruntwork-io/terragrunt-action@v2
+      with:
+          tf_version: ${{ env.tf_version }}
+          tg_version: ${{ env.tg_version }}
+          tg_dir: ${{ env.working_dir }}
     # Terragrunt Check
-    - name: Check terragrunt HCL
+    - name: Terraform Format
       id: fmt
       if: github.event_name == 'pull_request'
       uses: gruntwork-io/terragrunt-action@v2
       with:
-        tf_version: ${{ env.tf_version }}
-        tg_version: ${{ env.tg_version }}
-        tg_dir: ${{ env.working_dir }}
-        tg_command: 'hclfmt --terragrunt-check --terragrunt-diff'
+          tf_version: ${{ env.tf_version }}
+          tg_version: ${{ env.tg_version }}
+          tg_dir: ${{ env.working_dir }}
+          tg_command: 'hclfmt --terragrunt-check --terragrunt-diff'
       continue-on-error: true
 
 #    - name: Setup Infracost
