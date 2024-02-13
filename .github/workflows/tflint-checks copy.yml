@@ -138,7 +138,7 @@ jobs:
           #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
           #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
           #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
-          #### All vars 🤖\`${{ toJSON(vars) }}\`
+          #### All vars 🤖\`${{ toJSON(steps) }}\`
 
           <details><summary>Show Plan</summary>
 
