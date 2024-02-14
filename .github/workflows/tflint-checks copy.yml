@@ -61,7 +61,7 @@ jobs:
       if: github.event_name == 'pull_request'
       env:
         PLAN: "${{ steps.plan.outputs.stdout }}"
-        FMT: "${{ steps.fmt.outputs.stdout }}"
+        FMT: "${{ steps.fmt.outputs.tg_action_output }}"
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
