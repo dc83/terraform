@@ -2,12 +2,9 @@ name: Terraform
 
 on:
   pull_request:
-    branches:
-      - master
-  push:
-    branches:
-      - master
-
+    branches: ["main"]
+    paths-ignore:
+      - '**/README.md'
 env:
   tf_version: '1.5.7'
   tg_version: '0.53.2'
