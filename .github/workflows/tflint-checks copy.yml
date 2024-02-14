@@ -37,7 +37,7 @@ jobs:
           tf_version: ${{ env.tf_version }}
           tg_version: ${{ env.tg_version }}
           tg_dir: ${{ env.working_dir }}
-          tg_command: 'hclfmt --terragrunt-check --terragrunt-diff'
+          tg_command: 'hclfmt --terragrunt-check --terragrunt-diff --terragrunt-json-log'
       continue-on-error: true
 
     - name: Terraform Init
@@ -81,7 +81,7 @@ jobs:
           ${{ steps.fmt.outputs.tg_action_output }}
 
           </details>
-          #### Terraform JSON (steps) ⚙️ \` ${{ toJSON(steps.fmt.outputs.tg_action_output) }}\`
+          #### Terraform JSON (steps) ⚙️ \` ${{ toJSON(steps.fmt) }}\`
           #### Terraform Initialization ⚙️ \`${{ steps.init.outcome }}\`
           #### Terraform Validation 🤖 \`${{ steps.validate.outcome }}\`
           <details><summary>Validation Output</summary>
