@@ -77,7 +77,7 @@ jobs:
             </details>
             #### Terraform JSON (steps) ⚙️ \` ${{ toJSON(steps) }}\`
             #### Terraform JSON (steps2) ⚙️ \` ${{ toJSON(needs.checks.outputs) }}\`
-            #### Terraform Initialization ⚙️ \`${{ steps.init.outcome }}\`
+            #### Terraform Initialization ⚙️ \`${{ needs.checks.outputs.* }}\`
             #### Terraform Validation 🤖 \`${{ steps.validate.outcome }}\`
             <details><summary>Validation Output</summary>
 
