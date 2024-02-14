@@ -8,15 +8,13 @@ on:
 env:
   tf_version: '1.5.7'
   tg_version: '0.53.2'
-  tg_dir: './'
+  working_dir: './'
   
 jobs:
-  terraform:
-    name: Plan / Apply
+  # Terragrunt Check
+  checks:
+    name: Terragrunt Checks
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./
     permissions:
       contents: read
       pull-requests: write
@@ -24,93 +22,90 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Use Terraform 1.3.7
-      uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: 1.3.7
-
-    # Terragrunt Check
-    - name: Terraform Format
-      id: fmt
+    - name: Check terragrunt HCL
       uses: gruntwork-io/terragrunt-action@v2
       with:
+        tf_version: ${{ env.tf_version }}
+        tg_version: ${{ env.tg_version }}
+        tg_dir: ${{ env.working_dir }}
+        tg_command: 'hclfmt --terragrunt-check --terragrunt-diff'
+      continue-on-error: true
+#        tg_command: 'hclfmt --terragrunt-check --terragrunt-diff --terragrunt-json-log'
+  plan:
+    runs-on: ubuntu-latest
+    needs: [ checks ]
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@main
+
+      - name: Plan
+        uses: gruntwork-io/terragrunt-action@v2
+        with:
           tf_version: ${{ env.tf_version }}
           tg_version: ${{ env.tg_version }}
           tg_dir: ${{ env.working_dir }}
-          tg_command: 'hclfmt --terragrunt-check --terragrunt-diff --terragrunt-json-log'
-      continue-on-error: true
+          tg_command: 'plan'
+        continue-on-error: true
 
-    - name: Terraform Init
-      id: init
-      run: terraform init
-      continue-on-error: true
+  comment:
+    runs-on: ubuntu-latest
+    needs: [checks, plan]
+    steps:
+      - name: Pull Request Comment
+        uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
+        env:
+          PLAN: "${{ steps.plan.outputs.stdout }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            })
+            const botComment = comments.find(comment => {
+              return comment.user.type === 'Bot' && comment.body.includes('Terraform Format and Style')
+            })
 
-    - name: Terraform Validate
-      id: validate
-      run: terraform validate -no-color
-      continue-on-error: true
+            const output = `#### Terraform Format and Style 🖌 \`${{ steps.fmt.outcome }}\`
+            <details><summary>Validation Output</summary>
+            <code>
+            ${{ steps.fmt.outputs.tg_action_output }}
+            </code>
+            </details>
+            #### Terraform JSON (steps) ⚙️ \` ${{ toJSON(steps.fmt) }}\`
+            #### Terraform Initialization ⚙️ \`${{ steps.init.outcome }}\`
+            #### Terraform Validation 🤖 \`${{ steps.validate.outcome }}\`
+            <details><summary>Validation Output</summary>
 
-    - name: Terraform Plan
-      id: plan
-      if: github.event_name == 'pull_request'
-      run: terraform plan -no-color -input=false
-      continue-on-error: true
+            \`\`\`\n
+            ${{ steps.validate.outputs.stdout }}
+            \`\`\`
 
-    - name: Pull Request Comment
-      uses: actions/github-script@v6
-      if: github.event_name == 'pull_request'
-      env:
-        PLAN: "${{ steps.plan.outputs.stdout }}"
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          const { data: comments } = await github.rest.issues.listComments({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: context.issue.number,
-          })
-          const botComment = comments.find(comment => {
-            return comment.user.type === 'Bot' && comment.body.includes('Terraform Format and Style')
-          })
+            </details>
 
-          const output = `#### Terraform Format and Style 🖌 \`${{ steps.fmt.outcome }}\`
-          <details><summary>Validation Output</summary>
-          <code>
-          ${{ steps.fmt.outputs.tg_action_output }}
-          </code>
-          </details>
-          #### Terraform JSON (steps) ⚙️ \` ${{ toJSON(steps.fmt) }}\`
-          #### Terraform Initialization ⚙️ \`${{ steps.init.outcome }}\`
-          #### Terraform Validation 🤖 \`${{ steps.validate.outcome }}\`
-          <details><summary>Validation Output</summary>
+            #### Terraform Plan 📖 \`${{ steps.plan.outcome }}\`
 
-          \`\`\`\n
-          ${{ steps.validate.outputs.stdout }}
-          \`\`\`
+            <details><summary>Show Plan</summary>
 
-          </details>
+            \`\`\`terraform\n
+            ${process.env.PLAN}
+            \`\`\`
 
-          #### Terraform Plan 📖 \`${{ steps.plan.outcome }}\`
+            </details>`;
 
-          <details><summary>Show Plan</summary>
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
 
-          \`\`\`terraform\n
-          ${process.env.PLAN}
-          \`\`\`
-
-          </details>`;
-
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: output
-          })
-
-#    - name: Terraform Status
-#      if: steps.plan.outcome == 'failure' || steps.validate.outcome == 'failure' || steps.init.outcome == 'failure' || steps.fmt.outcome == 'failure'
-#      run: exit 1
-#
-#    - name: Terraform Apply
-#      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-#      run: terraform apply -auto-approve -input=false
+  #    - name: Terraform Status
+  #      if: steps.plan.outcome == 'failure' || steps.validate.outcome == 'failure' || steps.init.outcome == 'failure' || steps.fmt.outcome == 'failure'
+  #      run: exit 1
+  #
+  #    - name: Terraform Apply
+  #      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+  #      run: terraform apply -auto-approve -input=false
