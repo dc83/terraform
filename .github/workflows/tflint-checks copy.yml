@@ -73,7 +73,7 @@ jobs:
               return comment.user.type === 'Bot' && comment.body.includes('Terraform Format and Style')
             })
 
-            const output = `#### Terraform Format and Style 🖌 \`${{ needs.checks.outputs.fmt-outcome }}\`
+            const output = `#### Terraform Format and Style 🖌 \`${ needs.checks.outputs.fmt-outcome }\`
             <details><summary>Validation Output</summary>
             <code>
             ${{ needs.checks.outputs.fmt-result }}
