@@ -77,9 +77,8 @@ jobs:
           const output = `#### Terraform Format and Style 🖌 \`${{ steps.fmt.outcome }}\`
           <details><summary>Validation Output</summary>
 
-          \`\`\`\n
+
           ${{ steps.fmt.outputs.tg_action_output }}
-          \`\`\`
 
           </details>
           #### Terraform JSON (steps) ⚙️ \` ${{ toJSON(steps.fmt.outputs.tg_action_output) }}\`
