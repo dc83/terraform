@@ -78,7 +78,7 @@ jobs:
           <details><summary>Validation Output</summary>
 
           \`\`\`\n
-          ${steps.fmt.outputs.tg_action_output}
+          ${{ steps.fmt.outputs.tg_action_output }}
           \`\`\`
 
           </details>
