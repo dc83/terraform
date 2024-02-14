@@ -98,12 +98,12 @@ jobs:
 
             </details>
 
-            #### Terraform Plan 📖 \`${join(needs.plan.outputs.*)}\`
+            #### Terraform Plan 📖 \`${{ needs.checks.outputs.plan-outcome }}\`
 
             <details><summary>Show Plan</summary>
 
             \`\`\`terraform\n
-            ${process.env.PLAN}
+            ${{ needs.checks.outputs.plan-result }}
             \`\`\`
 
             </details>`;
