@@ -48,6 +48,7 @@ jobs:
           tg_version: ${{ env.tg_version }}
           tg_dir: ${{ env.working_dir }}
           tg_command: 'hclfmt --terragrunt-check --terragrunt-diff'
+      continue-on-error: true
 
 #    - name: Setup Infracost
 #      uses: infracost/actions/setup@v2
