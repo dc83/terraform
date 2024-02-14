@@ -130,11 +130,11 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
-          const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+          const output = `#### Terraform Format and Style 🖌\`toJSON(${{ steps }})\`
 
           <details><summary>Show Plan</summary>
           \`\`\`\n
-          ${steps.fmt.outputs.tg_action_output}
+          TEST
           \`\`\`
           </details>
 
