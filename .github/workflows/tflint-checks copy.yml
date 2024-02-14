@@ -33,7 +33,6 @@ jobs:
         tg_version: ${{ env.tg_version }}
         tg_dir: ${{ env.working_dir }}/${{ matrix.path }}
         tg_command: 'hclfmt --terragrunt-check --terragrunt-diff'
-      continue-on-error: true
 
 #        tg_command: 'hclfmt --terragrunt-check --terragrunt-diff --terragrunt-json-log'
   plan:

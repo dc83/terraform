@@ -3,7 +3,7 @@ terraform {
 }
 
 include "config" {
-    path           = find_in_parent_folders("config.hcl")
+  path           = find_in_parent_folders("config.hcl")
   expose         = true
   merge_strategy = "no_merge"
 }
