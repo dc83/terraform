@@ -8,7 +8,7 @@ on:
 env:
   tf_version: '1.5.7'
   tg_version: '0.53.2'
-  working_dir: './'
+  working_dir: 'environment'
 
 jobs:
   # Terragrunt Check
@@ -31,24 +31,34 @@ jobs:
       with:
         tf_version: ${{ env.tf_version }}
         tg_version: ${{ env.tg_version }}
-        tg_dir: ${{ env.working_dir }}
+        tg_dir: ${{ env.working_dir }}/${{ matrix.path }}
         tg_command: 'hclfmt --terragrunt-check --terragrunt-diff'
       continue-on-error: true
 
 #        tg_command: 'hclfmt --terragrunt-check --terragrunt-diff --terragrunt-json-log'
   plan:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        path:
+          - dev
+          - prod
+    outputs:
+      plan-outcome: ${{ steps.plan.outcome }}
+      plan-result: ${{ steps.plan.outputs.tg_action_output }}
     needs: [ checks ]
     steps:
       - name: 'Checkout'
         uses: actions/checkout@main
 
       - name: Plan
+        id: plan
         uses: gruntwork-io/terragrunt-action@v2
         with:
           tf_version: ${{ env.tf_version }}
           tg_version: ${{ env.tg_version }}
-          tg_dir: ${{ env.working_dir }}
+          tg_dir: ${{ env.working_dir }}/${{ matrix.path }}
           tg_command: 'plan'
         continue-on-error: true
 
@@ -73,11 +83,9 @@ jobs:
               return comment.user.type === 'Bot' && comment.body.includes('Terraform Format and Style')
             })
 
-            const output = `#### Terraform Format and Style 🖌 \`${{ needs.checks.outputs.fmt-outcome }}\`
-            <details><summary>Validation Output</summary>
-            <code>
-            ${{ needs.checks.outputs.fmt-result }}
-            </code>
+            const output = `#### Terragrunt Format and Style 🖌 \`${{ needs.checks.outputs.fmt-outcome }}\`
+            <details><summary>Format Output</summary>
+              <code>${{ needs.checks.outputs.fmt-result }}</code>
             </details>
             \n\n\n\n
 
@@ -90,7 +98,7 @@ jobs:
 
             </details>
 
-            #### Terraform Plan 📖 \`${{ steps.plan.outcome }}\`
+            #### Terraform Plan 📖 \`${join(needs.plan.outputs.*)}\`
 
             <details><summary>Show Plan</summary>
 
