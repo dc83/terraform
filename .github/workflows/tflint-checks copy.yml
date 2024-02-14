@@ -127,8 +127,6 @@ jobs:
 
     - name: Post Terraform Plan output
       uses: actions/github-script@v6
-      env:
-        PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
