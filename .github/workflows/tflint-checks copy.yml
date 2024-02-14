@@ -136,11 +136,9 @@ jobs:
           const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
 
           <details><summary>Show Plan</summary>
-
           \`\`\`\n
           ${steps.fmt.outputs.tg_action_output}
           \`\`\`
-
           </details>
 
           *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
