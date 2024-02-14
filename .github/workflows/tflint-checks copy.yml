@@ -23,6 +23,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Check terragrunt HCL
+      id: fmt
       uses: gruntwork-io/terragrunt-action@v2
       with:
         tf_version: ${{ env.tf_version }}
@@ -76,6 +77,8 @@ jobs:
             </details>
             #### Terraform JSON (steps) ⚙️ \` ${{ toJSON(steps.fmt) }}\`
             #### Terraform JSON (steps2) ⚙️ \` ${{ toJSON(steps) }}\`
+            #### Terraform JSON (steps3) ⚙️ \` ${{ toJSON(checks) }}\`
+            #### Terraform JSON (steps4) ⚙️ \` ${{ toJSON(fmt) }}\`
             #### Terraform Initialization ⚙️ \`${{ steps.init.outcome }}\`
             #### Terraform Validation 🤖 \`${{ steps.validate.outcome }}\`
             <details><summary>Validation Output</summary>
