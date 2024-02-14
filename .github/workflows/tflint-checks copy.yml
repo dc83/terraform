@@ -78,7 +78,7 @@ jobs:
           <details><summary>Validation Output</summary>
 
           \`\`\`\n
-          ${process.env.FMT}
+          ${steps.fmt.outputs.tg_action_output}
           \`\`\`
 
           </details>
