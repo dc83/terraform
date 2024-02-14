@@ -4,7 +4,7 @@ on:
 env:
   tf_version: "latest"
   tg_version: "latest"
-  tf_working_dir: "./"
+  tf_working_dir: "."
 jobs:
   terragrunt:
     name: "Terragrunt"

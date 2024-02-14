@@ -6,7 +6,7 @@ module "sns" {
   create_topic_policy = true
   subscriptions = {
     sms = {
-       protocol = "sms"
+      protocol = "sms"
       endpoint = var.sms
     }
   }
