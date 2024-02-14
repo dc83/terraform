@@ -78,8 +78,7 @@ jobs:
             ${{ steps.fmt.outputs.tg_action_output }}
             </code>
             </details>
-            #### Terraform JSON (steps) ⚙️ \` ${{ toJSON(needs.checks.outputs.*) }}\`
-            #### Terraform JSON (steps2) ⚙️ \` ${{ toJSON(needs.checks.outputs) }}\`
+            #### Terraform JSON (steps2a) ⚙️ \` ${{ toJSON(needs.checks.outputs) }}\` \n\n
             #### Terraform Initialization ⚙️ \`${{ toJSON(needs.checks.*) }}\`
             #### Terraform Validation 🤖 \`${{ steps.validate.outcome }}\`
             <details><summary>Validation Output</summary>
