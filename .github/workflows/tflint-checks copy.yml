@@ -9,12 +9,14 @@ env:
   tf_version: '1.5.7'
   tg_version: '0.53.2'
   working_dir: './'
-  
+
 jobs:
   # Terragrunt Check
   checks:
     name: Terragrunt Checks
     runs-on: ubuntu-latest
+    outputs:
+      output1: ${{ steps.fmt.outputs.tg_action_output }}
     permissions:
       contents: read
       pull-requests: write
@@ -31,8 +33,6 @@ jobs:
         tg_dir: ${{ env.working_dir }}
         tg_command: 'hclfmt --terragrunt-check --terragrunt-diff'
       continue-on-error: true
-    outputs:
-        FMT:  ${{ steps.fmt.outputs.* }}
 
 #        tg_command: 'hclfmt --terragrunt-check --terragrunt-diff --terragrunt-json-log'
   plan:
@@ -78,9 +78,9 @@ jobs:
             ${{ steps.fmt.outputs.tg_action_output }}
             </code>
             </details>
-            #### Terraform JSON (steps) ⚙️ \` ${{ toJSON(steps) }}\`
+            #### Terraform JSON (steps) ⚙️ \` ${{ toJSON(needs.checks.outputs.*) }}\`
             #### Terraform JSON (steps2) ⚙️ \` ${{ toJSON(needs.checks.outputs) }}\`
-            #### Terraform Initialization ⚙️ \`${{ toJSON(needs.checks.outputs.*) }}\`
+            #### Terraform Initialization ⚙️ \`${{ toJSON(needs.checks.*) }}\`
             #### Terraform Validation 🤖 \`${{ steps.validate.outcome }}\`
             <details><summary>Validation Output</summary>
 
