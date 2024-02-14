@@ -31,8 +31,6 @@ jobs:
         tg_dir: ${{ env.working_dir }}
         tg_command: 'hclfmt --terragrunt-check --terragrunt-diff'
       continue-on-error: true
-    outputs:
-      fmt: ${{ steps.checks.outputs.tg_action_output }}
 #        tg_command: 'hclfmt --terragrunt-check --terragrunt-diff --terragrunt-json-log'
   plan:
     runs-on: ubuntu-latest
