@@ -21,7 +21,7 @@ dependency "lambda" {
 }
 
 dependency "sns" {
-  config_path = "../03_Sns"
+    config_path = "../03_Sns"
   mock_outputs = {
     arn_topic = "arn:aws:sns:eu-west-2:123456789012:myqueue-15PG5C2FC1CW8"
   }
