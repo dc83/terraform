@@ -61,12 +61,14 @@ jobs:
     steps:
       - name: 'Checkout'
         uses: actions/checkout@main
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-2
+
       - name: Init
         id: init
         uses: gruntwork-io/terragrunt-action@v2
@@ -88,10 +90,17 @@ jobs:
     outputs:
       plan-outcome: ${{ steps.plan.outcome }}
       plan-result: ${{ steps.plan.outputs.tg_action_output }}
-    needs: [ checks ]
+    needs: [ init ]
     steps:
       - name: 'Checkout'
         uses: actions/checkout@main
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
 
       - name: Plan
         id: plan
