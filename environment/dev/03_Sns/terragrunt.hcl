@@ -9,7 +9,7 @@ include "config" {
 }
 
 inputs = {
-  sms = "${include.config.locals.sms}"
+sms = "${include.config.locals.sms}"
 }
 
 include {
