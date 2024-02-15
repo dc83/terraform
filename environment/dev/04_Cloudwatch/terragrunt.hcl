@@ -14,8 +14,15 @@ include {
 
 dependency "lambda" {
   config_path = "../02_Lambda"
+  mock_outputs = {
+    fn_name_snapshot = "temporary-function-snapshot"
+    fn_name_prune    = "temporary-function-prune"
+  }
 }
 
 dependency "sns" {
   config_path = "../03_Sns"
+  mock_outputs = {
+    arn_topic = "arn:aws:sns:eu-west-2:123456789012:myqueue-15PG5C2FC1CW8"
+  }
 }

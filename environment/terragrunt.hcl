@@ -4,21 +4,20 @@ locals {
   env    = local.parsed.env
 }
 
-generate "backend" {
-  path      = "backend.tf"
-  if_exists = "overwrite_terragrunt"
-  contents  = <<EOF
-terraform {
-  backend "s3" {
+remote_state {
+  backend = "s3"
+  generate = {
+    path      = "backend.tf"
+    if_exists = "overwrite_terragrunt"
+  }
+  config = {
     bucket = "example-buckekjkj66767687hjkkt-${local.env}"
-    key            = "${path_relative_to_include()}/terraform.tfstate"
+
+    key = "${path_relative_to_include()}/terraform.tfstate"
     region         = "us-east-1"
     encrypt        = true
     dynamodb_table = "my-lock-table"
-    skip_credentials_validation = true
   }
-}
-EOF
 }
 
 generate "provider" {

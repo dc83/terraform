@@ -46,6 +46,32 @@ jobs:
         tg_command: 'hclfmt --terragrunt-check --terragrunt-diff'
 
 #        tg_command: 'hclfmt --terragrunt-check --terragrunt-diff --terragrunt-json-log'
+  init:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        path:
+          - dev
+          - prod
+    outputs:
+      plan-outcome: ${{ steps.plan.outcome }}
+      plan-result: ${{ steps.plan.outputs.tg_action_output }}
+    needs: [ checks ]
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@main
+
+      - name: Init
+        id: init
+        uses: gruntwork-io/terragrunt-action@v2
+        with:
+          tf_version: ${{ env.tf_version }}
+          tg_version: ${{ env.tg_version }}
+          tg_dir: ${{ env.working_dir }}/${{ matrix.path }}
+          tg_command: 'run-all init --terragrunt-non-interactive'
+        continue-on-error: true
+
   plan:
     runs-on: ubuntu-latest
     strategy:
