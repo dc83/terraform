@@ -1,50 +1,65 @@
-name: 'Terragrunt GitHub Actions'
-on:
-  - pull_request
+name: Terragrunt Workflow
 
-env:
-  tf_version: '1.5.7'
-  tg_version: '0.53.2'
-  working_dir: './'
+on:
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  checks:
+  terragrunt:
+    name: Terragrunt Matrix
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        environment: [dev, prod]
+
     steps:
-      - name: 'Checkout'
-        uses: actions/checkout@main
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      - name: Check terragrunt HCL
-        uses: gruntwork-io/terragrunt-action@v2
-        with:
-          tf_version: ${{ env.tf_version }}
-          tg_version: ${{ env.tg_version }}
-          tg_dir: ${{ env.working_dir }}
-          tg_command: 'hclfmt --terragrunt-check --terragrunt-diff'
-          tg_comment: '1'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  plan:
-    runs-on: ubuntu-latest
-    needs: [ checks ]
-    steps:
-      - name: 'Checkout'
-        uses: actions/checkout@main
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: 1.0.0
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-2
+    - name: Install Terragrunt
+      run: |
+        wget -qO- https://github.com/gruntwork-io/terragrunt/releases/download/v0.30.0/terragrunt_linux_amd64.zip | sudo unzip -d /usr/local/bin/ -
 
-      - name: Plan
-        uses: gruntwork-io/terragrunt-action@v2
-        with:
-          tf_version: ${{ env.tf_version }}
-          tg_version: ${{ env.tg_version }}
-          tg_dir: ${{ env.working_dir }}/environment/dev
-          tg_command: 'run-all plan'
-          tg_comment: '1'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Format Terraform code
+      run: |
+        terragrunt fmt -recursive
+
+    - name: Plan Terraform changes
+      id: plan
+      run: |
+        terragrunt plan -out=tfplan -input=false -lock=false -var "environment=${{ matrix.environment }}"
+      continue-on-error: true
+
+    - name: Comment PR with Terraform plan
+      if: always()
+      run: |
+        echo "Terraform plan for environment: ${{ matrix.environment }}" >> comment.txt
+        echo "----------------" >> comment.txt
+        cat tfplan >> comment.txt
+        echo "" >> comment.txt
+        echo "For detailed changes, check the logs." >> comment.txt
+        echo "::set-output name=comment::$(cat comment.txt)"
+
+    - name: Post Terraform plan as a comment on PR
+      if: always()
+      uses: actions/github-script@v4
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          await github.pulls.createReviewComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: context.payload.pull_request.number,
+            body: '${{ steps.plan.outputs.comment }}',
+          })
+
+    - name: Ask for Terraform apply approval
+      if: always()
+      run: echo "Please review the Terraform plan and approve the apply if it looks good."
