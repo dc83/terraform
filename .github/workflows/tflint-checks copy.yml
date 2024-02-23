@@ -31,7 +31,7 @@ jobs:
 
     - name: Format Terraform code
       run: |
-        hclfmt --terragrunt-check --terragrunt-diff
+        terragrunt hclfmt --terragrunt-check --terragrunt-diff
 
     - name: Plan Terraform changes
       id: plan
