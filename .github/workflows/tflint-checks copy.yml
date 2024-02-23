@@ -29,7 +29,7 @@ jobs:
 
     - name: Format Terraform code
       run: |
-        terragrunt fmt -recursive
+        hclfmt --terragrunt-check --terragrunt-diff
 
     - name: Plan Terraform changes
       id: plan
@@ -47,18 +47,4 @@ jobs:
         echo "For detailed changes, check the logs." >> comment.txt
         echo "::set-output name=comment::$(cat comment.txt)"
 
-    - name: Post Terraform plan as a comment on PR
-      if: always()
-      uses: actions/github-script@v6
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          await github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: '${{ steps.plan.outputs.comment }}',
-          })
-    - name: Ask for Terraform apply approval
-      if: always()
-      run: echo "Please review the Terraform plan and approve the apply if it looks good."
+   
