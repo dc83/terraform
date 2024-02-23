@@ -53,13 +53,12 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
-          await github.pulls.createReviewComment({
+          await github.rest.issues.createComment({
+            issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            pull_number: context.payload.pull_request.number,
             body: '${{ steps.plan.outputs.comment }}',
           })
-
     - name: Ask for Terraform apply approval
       if: always()
       run: echo "Please review the Terraform plan and approve the apply if it looks good."
