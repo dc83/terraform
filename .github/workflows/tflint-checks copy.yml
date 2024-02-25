@@ -56,9 +56,9 @@ jobs:
 
       - name: Comment Apply
         id: comment-apply
-        uses: peter-evans/create-or-update-comment@v2
+        uses: peter-evans/create-or-update-comment@@v4
         with:
-          token: ${{ inputs.github_token }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ inputs.pr_id }}
           body: |
             Terraform plan for environment: ${{ matrix.environment }}
