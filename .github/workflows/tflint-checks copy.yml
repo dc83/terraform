@@ -44,7 +44,7 @@ jobs:
         working-directory: environment/${{ matrix.environment }}/
         run: |
           echo 'plan<<EOF' >> $GITHUB_OUTPUT
-          terragrunt run-all plan -out=tfplan >> $GITHUB_OUTPUT -input=false -lock=false
+          terragrunt run-all plan -out=tfplan >> $GITHUB_OUTPUT -input=false -lock=false --terragrunt-no-color
           echo 'EOF' >> $GITHUB_OUTPUT
         continue-on-error: true
 
