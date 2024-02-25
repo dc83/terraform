@@ -7,47 +7,52 @@ on:
 
 jobs:
   terragrunt:
-    name: Terragrunt Matrix
-    runs-on: ubuntu-latest
-
     strategy:
       matrix:
         environment: [dev, prod]
 
+    name: Terragrunt Matrix
+    runs-on: ubuntu-latest
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v3
-      with:
-        terraform_version: "1.1.7"
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Install Terragrunt
-      run: |
-        sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v0.54.17/terragrunt_linux_amd64"
-        sudo chmod +x /bin/terragrunt
-        terragrunt -v
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.1.7"
 
-    - name: Format Terraform code
-      run: |
-        terragrunt hclfmt --terragrunt-check --terragrunt-diff
+      - name: Install Terragrunt
+        run: |
+          sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v0.54.17/terragrunt_linux_amd64"
+          sudo chmod +x /bin/terragrunt
+          terragrunt -v
 
-    - name: Plan Terraform changes
-      id: plan
-      working-directory: environment/${{ matrix.environment }}/
-      run: |
-        terragrunt run-all plan -out=tfplan -input=false -lock=false -var "environment=${{ matrix.environment }}"
-      continue-on-error: true
+      - name: Format Terraform code
+        run: |
+          terragrunt hclfmt --terragrunt-check --terragrunt-diff
 
-    - name: Comment PR with Terraform plan
-      if: always()
-      run: |
-        echo "Terraform plan for environment: ${{ matrix.environment }}" >> comment.txt
-        echo "----------------" >> comment.txt
-        cat tfplan >> comment.txt
-        echo "" >> comment.txt
-        echo "For detailed changes, check the logs." >> comment.txt
-        echo "::set-output name=comment::$(cat comment.txt)"
+      - name: Plan Terraform changes
+        id: plan
+        working-directory: environment/${{ matrix.environment }}/
+        run: |
+          terragrunt run-all plan -out=tfplan -input=false -lock=false -var "environment=${{ matrix.environment }}"
+        continue-on-error: true
 
-   
+      - name: Comment PR with Terraform plan
+        if: always()
+        run: |
+          echo "Terraform plan for environment: ${{ matrix.environment }}" >> comment.txt
+          echo "----------------" >> comment.txt
+          cat tfplan >> comment.txt
+          echo "" >> comment.txt
+          echo "For detailed changes, check the logs." >> comment.txt
+          echo "::set-output name=comment::$(cat comment.txt)"
+
