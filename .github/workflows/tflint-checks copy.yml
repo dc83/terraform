@@ -54,16 +54,15 @@ jobs:
           name: ${{ inputs.pr_id }}-tf-plan
           path: ${{ inputs.terraform_directory }}/tfplan
 
-      - name: Comment Apply
+      - name: Create comment
         id: comment-apply
-        uses: peter-evans/create-or-update-comment@@v4
+        uses: peter-evans/create-or-update-comment@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ inputs.pr_id }}
+          issue-number: 1
           body: |
             Terraform plan for environment: ${{ matrix.environment }}
 
             ```
             ${{ steps.plan.outputs.plan }}
             ```
-
+          reactions: '+1'
