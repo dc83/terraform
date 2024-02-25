@@ -68,6 +68,6 @@ jobs:
             ```
             FMT:
             ```
-            ${{ steps.plan.outputs.plan }}
+            toJSON(${{ steps.fmt }})
             ```
           reactions: '+1'
