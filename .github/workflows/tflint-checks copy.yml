@@ -43,16 +43,27 @@ jobs:
         id: plan
         working-directory: environment/${{ matrix.environment }}/
         run: |
-          terragrunt run-all plan -out=tfplan -input=false -lock=false
+          terragrunt run-all plan -out=tfplan >> $GITHUB_OUTPUT -input=false -lock=false
+          echo 'EOF' >> $GITHUB_OUTPUT
         continue-on-error: true
 
-      - name: Comment PR with Terraform plan
-        if: always()
-        run: |
-          echo "Terraform plan for environment: ${{ matrix.environment }}" >> comment.txt
-          echo "----------------" >> comment.txt
-          cat environment/${{ matrix.environment }}/tfplan >> comment.txt
-          echo "" >> comment.txt
-          echo "For detailed changes, check the logs." >> comment.txt
-          echo "::set-output name=comment::$(cat comment.txt)"
+      - name: Save Artifact
+        id: save-artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ inputs.pr_id }}-tf-plan
+          path: ${{ inputs.terraform_directory }}/tfplan
+
+      - name: Comment Apply
+        id: comment-apply
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          token: ${{ inputs.github_token }}
+          issue-number: ${{ inputs.pr_id }}
+          body: |
+            Terraform plan for environment: ${{ matrix.environment }}
+
+            ```
+            ${{ steps.plan.outputs.plan }}
+            ```
 
