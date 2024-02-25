@@ -43,7 +43,7 @@ jobs:
         id: plan
         working-directory: environment/${{ matrix.environment }}/
         run: |
-          terragrunt run-all plan -out=tfplan -input=false -lock=false -var "environment=${{ matrix.environment }}"
+          terragrunt run-all plan -out=tfplan -input=false -lock=false
         continue-on-error: true
 
       - name: Comment PR with Terraform plan
