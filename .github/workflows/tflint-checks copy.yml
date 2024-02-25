@@ -35,9 +35,9 @@ jobs:
 
     - name: Plan Terraform changes
       id: plan
-      working-directory: environment/dev/us-east-1/infra/
+      working-directory: environment/${{ matrix.environment }}/
       run: |
-        terragrunt run-all plan -out=tfplan -input=false -lock=false -var "environment=${{ matrix.environment }}" -terragrunt-working-dir /environment/${{ matrix.environment }}/
+        terragrunt run-all plan -out=tfplan -input=false -lock=false -var "environment=${{ matrix.environment }}"
       continue-on-error: true
 
     - name: Comment PR with Terraform plan
