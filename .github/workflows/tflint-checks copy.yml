@@ -51,7 +51,7 @@ jobs:
         run: |
           echo "Terraform plan for environment: ${{ matrix.environment }}" >> comment.txt
           echo "----------------" >> comment.txt
-          cat tfplan >> comment.txt
+          cat environment/${{ matrix.environment }}/tfplan >> comment.txt
           echo "" >> comment.txt
           echo "For detailed changes, check the logs." >> comment.txt
           echo "::set-output name=comment::$(cat comment.txt)"
