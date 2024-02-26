@@ -64,9 +64,9 @@ jobs:
         terragrunt -v
 
     # Initialize a new or existing Terragrunt working directory by creating initial files, loading any remote state, downloading modules, etc.
-    - name: Terragrunt Init
-      id: init
-      run: terragrunt run-all init --terragrunt-non-interactive
+#    - name: Terragrunt Init
+#      id: init
+#      run: terragrunt run-all init --terragrunt-non-interactive
 
     # Checks that all Terraform configuration files are correctly written
     - name: Terragrunt Validate
