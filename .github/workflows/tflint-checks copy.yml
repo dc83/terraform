@@ -1,59 +1,118 @@
-name: 'Create_Development_Environment'
+name: 'Deploy resources to each AWS account'
 on:
-  pull_request:
-    branches:
-      - main
-
-env:
-  WORKING_DIRECTORY: './environment/dev'
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  AWS_REGION: "us-east-1"
+  workflow_call:
+    inputs:
+      # working-directory is the location from where this workflow will be triggered
+      working-directory:
+        required: true
+        type: string
+        default: '.'
+      environment:
+        required: true
+        type: string
+        default: '.'
+permissions:
+  actions: none
+  checks: none
+  contents: read
+  deployments: none
+  id-token: write
+  issues: none
+  discussions: none
+  packages: none
+  pages: none
+  pull-requests: write
+  repository-projects: none
+  security-events: none
+  statuses: none
 
 jobs:
-  plan:
-    name: 'Terragrunt'
+  deploy:
+    name: Deploy to ${{ inputs.environment }}
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ inputs.working-directory }}
     steps:
-      - name: 'Checkout'
-        uses: actions/checkout@master
+    - name: Checkout
+      uses: actions/checkout@v3
 
-      - uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.7.4
-          terraform_wrapper: false
+    - nwsme: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: eu-west-2
 
-      - name: Setup Terragrunt
-        uses: autero1/action-terragrunt@v1.1.0
-        with:
-          terragrunt_version: 0.54.17
+    # Install the latest version of Terragrunt CLI and configure the Terragrunt CLI configuration file with a Terragrunt Cloud user API token
+    - name: Setup Terraform
+      uses: hashicorp/setup-Terraform@v1
+      with:
+        terraform_version: 1.7.4
+        terraform_wrapper: true
+    - name: Setup Terraform version
+      run: terraform --version
+    - name: Setup Terraform wrapper path
+      run: which terraform
 
-      - name: Interact with Terragrunt
-        run: terragrunt --version
+    - name: Setup Terragrunt
+      run: |
+        sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v0.54.17/terragrunt_linux_amd64"
+        sudo chmod +x /bin/terragrunt
+        terragrunt -v
 
-      - name: 'Terragrunt Init'
-        run: terragrunt run-all init --terragrunt-non-interactive
-        working-directory: ${{ env.WORKING_DIRECTORY }}
+    # Initialize a new or existing Terragrunt working directory by creating initial files, loading any remote state, downloading modules, etc.
+    - name: Terragrunt Init
+      id: init
+      run: terragrunt init --terragrunt-non-interactive"
 
-      - name: 'Terragrunt Plan'
-        run: terragrunt run-all plan --terragrunt-non-interactive
-        working-directory: ${{ env.WORKING_DIRECTORY }}
-  deployment:
-    needs: plan
-    runs-on: ubuntu-latest
-    steps:
-      - name: 'Checkout'
-        uses: actions/checkout@master
+    # Checks that all Terraform configuration files are correctly written
+    - name: Terragrunt Validate
+      id: validate
+      run: terragrunt validate -no-color --terragrunt-non-interactive"
 
-      - uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.0.0
-          terraform_wrapper: false
+    # Generates an execution plan for Terragrunt
+    - name: Terragrunt Plan
+      id: plan
+      if: github.ref != 'refs/heads/main' || github.event_name == 'pull_request'
+      run: terragrunt plan -no-color --terragrunt-non-interactive"
 
-      - name: Setup Terragrunt
-        uses: autero1/action-terragrunt@v1.1.0
-        with:
-          terragrunt_version: 0.37.1
-      - name: 'Terragrunt Apply'
-        run: terragrunt run-all apply --terragrunt-non-interactive
-        working-directory: ${{ env.WORKING_DIRECTORY }}
+    # Updates the pull request with details for the reviewer to evaluate the PR
+    - name: Update Pull Request
+      uses: actions/github-script@v6
+      if: github.event_name == 'pull_request'
+      env:
+        PLAN: "Terraform plan for Environment: ${{ inputs.environment }}\n${{ steps.plan.outputs.stdout }}"
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const output = `#### Terraform run for ${{ inputs.environment }}\`
+          #### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+          #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+          #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+          #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+
+          <details><summary>Show Plan</summary>
+
+          \`\`\`\n
+          ${process.env.PLAN}
+          \`\`\`
+
+          </details>
+
+          *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: output
+          })
+
+      # On push to main, build or change infrastructure according to Terragrunt configuration files
+      # Note: It is recommended to set up a required "strict" status check in your repository for "Terragrunt Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
+#    - name: Terragrunt Apply
+#      if: github.ref == 'refs/heads/main'
+#      run: terragrunt apply -auto-approve

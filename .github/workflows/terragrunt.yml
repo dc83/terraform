@@ -1,0 +1,39 @@
+name: 'Deploy-to-multiple-environments'
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ '*' ]
+    paths-ignore:
+      - '**/README.md'
+  pull_request:
+    branches: ["main"]
+    paths-ignore:
+      - '**/README.md'
+permissions: read-all
+jobs:
+  DeployToDev:
+    name: 'deploy-to-dev'
+    permissions:
+      pull-requests: write
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/deploy.yml
+    with:
+      working-directory: ./environment/dev/
+      environment: dev
+    secrets: inherit
+
+  DeployToTest:
+    name: 'deploy-to-Test'
+    needs: DeployToDev
+    permissions:
+      pull-requests: write
+      id-token: write
+      contents: read
+
+    uses: ./.github/workflows/deploy.yml
+    with:
+      working-directory: ./environment/test/us-east-1/infra
+      environment: Test
+    secrets: inherit
