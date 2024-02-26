@@ -1,73 +1,60 @@
-name: Terragrunt Workflow
-
+name: 'Create_Development_Environment'
 on:
-  pull_request:
+  push:
     branches:
-      - main
+      - dev
+
+
+env:
+  WORKING_DIRECTORY: './live/dev'
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: "us-east-1"
 
 jobs:
-  terragrunt:
-    strategy:
-      matrix:
-        environment: [dev, prod]
-
-    name: Terragrunt Matrix
+  plan:
+    name: 'Terragrunt'
     runs-on: ubuntu-latest
     steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
+      - name: 'Checkout'
+        uses: actions/checkout@master
+
+      - uses: hashicorp/setup-terraform@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-2
+          terraform_version: 1.0.0
+          terraform_wrapper: false
 
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+      - name: Setup Terragrunt
+        uses: autero1/action-terragrunt@v1.1.0
         with:
-          terraform_version: "1.7.4"
+          terragrunt_version: 0.37.1
 
-      - name: Install Terragrunt
-        run: |
-          sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v0.54.17/terragrunt_linux_amd64"
-          sudo chmod +x /bin/terragrunt
-          terragrunt -v
+      - name: Interact with Terragrunt
+        run: terragrunt --version
 
-      - name: Format Terraform code
-        id: fmt
-        run: |
-          terragrunt hclfmt --terragrunt-check --terragrunt-diff
+      - name: 'Terragrunt Init'
+        run: terragrunt run-all init --terragrunt-non-interactive
+        working-directory: ${{ env.WORKING_DIRECTORY }}
 
-      - name: Plan Terraform changes
-        id: plan
-        working-directory: environment/${{ matrix.environment }}/
-        run: |
-          terragrunt run-all plan -out=tfplan >> $GITHUB_OUTPUT -input=false -lock=false --terragrunt-no-color
-          echo 'EOF' >> $GITHUB_OUTPUT
-        continue-on-error: true
+      - name: 'Terragrunt Plan'
+        run: terragrunt run-all plan --terragrunt-non-interactive
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+  deployment:
+    needs: plan
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@master
 
-      - name: Save Artifact
-        id: save-artifact
-        uses: actions/upload-artifact@v3
+      - uses: hashicorp/setup-terraform@v2
         with:
-          name: ${{ inputs.pr_id }}-tf-plan
-          path: ${{ inputs.terraform_directory }}/tfplan
+          terraform_version: 1.0.0
+          terraform_wrapper: false
 
-      - name: Create comment
-        id: comment-apply
-        uses: peter-evans/create-or-update-comment@v4
+      - name: Setup Terragrunt
+        uses: autero1/action-terragrunt@v1.1.0
         with:
-          issue-number: 1
-          body: |
-            Terraform plan for environment: ${{ matrix.environment }}
-
-            ```
-            ${{ steps.plan.outputs.plan }}
-            ```
-            FMT:
-            ```
-            ${{ steps }}
-            ```
-          reactions: '+1'
+          terragrunt_version: 0.37.1
+      - name: 'Terragrunt Apply'
+        run: terragrunt run-all apply --terragrunt-non-interactive
+        working-directory: ${{ env.WORKING_DIRECTORY }}
