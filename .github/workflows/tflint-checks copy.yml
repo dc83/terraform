@@ -18,15 +18,15 @@ jobs:
       - name: 'Checkout'
         uses: actions/checkout@master
 
-      - uses: hashicorp/setup-terraform@v2
+      - uses: hashicorp/setup-terraform@@v3
         with:
-          terraform_version: 1.0.0
+          terraform_version: 1.7.4
           terraform_wrapper: false
 
       - name: Setup Terragrunt
         uses: autero1/action-terragrunt@v1.1.0
         with:
-          terragrunt_version: 0.37.1
+          terragrunt_version: 0.54.17
 
       - name: Interact with Terragrunt
         run: terragrunt --version
