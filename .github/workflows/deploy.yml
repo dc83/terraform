@@ -66,18 +66,18 @@ jobs:
     # Initialize a new or existing Terragrunt working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terragrunt Init
       id: init
-      run: terragrunt init --terragrunt-non-interactive"
+      run: terragrunt init --terragrunt-non-interactive
 
     # Checks that all Terraform configuration files are correctly written
     - name: Terragrunt Validate
       id: validate
-      run: terragrunt validate -no-color --terragrunt-non-interactive"
+      run: terragrunt validate -no-color --terragrunt-non-interactive
 
     # Generates an execution plan for Terragrunt
     - name: Terragrunt Plan
       id: plan
       if: github.ref != 'refs/heads/main' || github.event_name == 'pull_request'
-      run: terragrunt plan -no-color --terragrunt-non-interactive"
+      run: terragrunt plan -no-color --terragrunt-non-interactive
 
     # Updates the pull request with details for the reviewer to evaluate the PR
     - name: Update Pull Request
